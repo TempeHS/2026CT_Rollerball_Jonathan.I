@@ -83,17 +83,16 @@ public class PlayerController : MonoBehaviour
     void OnTriggerEnter(Collider other) 
     {
         // Check if the object the player collided with has the "PickUp" tag.
-        if (other.gameObject.CompareTag("PickUp")) 
-        {
-            // Deactivate the collided object (making it disappear).
-            other.gameObject.SetActive(false);
-
-            // Increment the count of "PickUp" objects collected.
-            count = count + 1;
-
-            // Update the count display.
+        if (other.gameObject.CompareTag("PickUp"))
+{
+         other.gameObject.SetActive(false);
+              count = count + 1;
             SetCountText();
-        }
+
+            // Spawn a new pickup
+             FindObjectOfType<PickupSpawner>().SpawnNewPickup();
+}
+
     }
 
     // Function to update the displayed count of "PickUp" objects collected.
@@ -110,6 +109,9 @@ public class PlayerController : MonoBehaviour
 
             // Destroy the enemy GameObject.
             Destroy(GameObject.FindGameObjectWithTag("Enemy"));
+
+            // ⭐ STOP TIMER (added line)
+            FindObjectOfType<TimerManager>().StopTimer();
         }
     }
 
