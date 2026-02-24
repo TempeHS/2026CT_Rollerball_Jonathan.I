@@ -4,58 +4,40 @@ using TMPro;
 
 public class PlayerController : MonoBehaviour
 {
-    // Rigidbody of the player.
     private Rigidbody rb; 
-
-    // Variable to keep track of collected "PickUp" objects.
     private int count;
 
-    // Movement along X and Y axes.
     private float movementX;
     private float movementY;
 
-    // Speed at which the player moves.
     public float speed = 0;
 
-    // Jump variables
     public float jumpForce = 5f;
     private bool isGrounded = true;
     public float groundCheckDistance = 0.6f;
 
-    // UI text component to display count of "PickUp" objects collected.
     public TextMeshProUGUI countText;
-
-    // UI object to display winning text.
     public GameObject winTextObject;
 
-    // Start is called before the first frame update.
+    // ⭐ NEW — pickup respawn system
+    public GameObject pickupPrefab;
+    public Vector3 spawnAreaSize = new Vector3(10, 0, 10);
+
     void Start()
     {
-        // Get and store the Rigidbody component attached to the player.
         rb = GetComponent<Rigidbody>();
-
-        // Initialize count to zero.
         count = 0;
-
-        // Update the count display.
         SetCountText();
-
-        // Initially set the win text to be inactive.
         winTextObject.SetActive(false);
     }
  
-    // This function is called when a move input is detected.
     void OnMove(InputValue movementValue)
     {
-        // Convert the input value into a Vector2 for movement.
         Vector2 movementVector = movementValue.Get<Vector2>();
-
-        // Store the X and Y components of the movement.
         movementX = movementVector.x; 
         movementY = movementVector.y; 
     }
 
-    // NEW — Jump input
     void OnJump(InputValue value)
     {
         if (isGrounded)
@@ -66,52 +48,49 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // NEW — Raycast ground check
         isGrounded = Physics.Raycast(transform.position, Vector3.down, groundCheckDistance);
     }
 
-    // FixedUpdate is called once per fixed frame-rate frame.
     private void FixedUpdate() 
     {
-        // Create a 3D movement vector using the X and Y inputs.
         Vector3 movement = new Vector3(movementX, 0.0f, movementY);
-
-        // Apply force to the Rigidbody to move the player.
         rb.AddForce(movement * speed); 
     }
 
     void OnTriggerEnter(Collider other) 
     {
-        // Check if the object the player collided with has the "PickUp" tag.
-        if (other.gameObject.CompareTag("PickUp"))
-{
-         other.gameObject.SetActive(false);
-              count = count + 1;
+        if (other.gameObject.CompareTag("PickUp")) 
+        {
+            other.gameObject.SetActive(false);
+            count++;
             SetCountText();
 
-            // Spawn a new pickup
-             FindObjectOfType<PickupSpawner>().SpawnNewPickup();
-}
-
+            // ⭐ Spawn TWO new pickups
+            SpawnNewPickup();
+            SpawnNewPickup();
+        }
     }
 
-    // Function to update the displayed count of "PickUp" objects collected.
+    // ⭐ NEW — spawns a new pickup in a random area
+    void SpawnNewPickup()
+    {
+        Vector3 randomPos = transform.position + new Vector3(
+            Random.Range(-spawnAreaSize.x / 2, spawnAreaSize.x / 2),
+            Random.Range(-spawnAreaSize.y / 2, spawnAreaSize.y / 2),
+            Random.Range(-spawnAreaSize.z / 2, spawnAreaSize.z / 2)
+        );
+
+        Instantiate(pickupPrefab, randomPos, Quaternion.identity);
+    }
+
     void SetCountText() 
     {
-        // Update the count text with the current count.
         countText.text = "Count: " + count.ToString();
 
-        // Check if the count has reached or exceeded the win condition.
         if (count >= 12)
         {
-            // Display the win text.
             winTextObject.SetActive(true);
-
-            // Destroy the enemy GameObject.
             Destroy(GameObject.FindGameObjectWithTag("Enemy"));
-
-            // ⭐ STOP TIMER (added line)
-            FindObjectOfType<TimerManager>().StopTimer();
         }
     }
 
@@ -119,12 +98,10 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Enemy"))
         {
-            // Destroy the current object
             Destroy(gameObject); 
-
-            // Update the winText to display "You Lose!"
             winTextObject.gameObject.SetActive(true);
             winTextObject.GetComponent<TextMeshProUGUI>().text = "You Lose!";
         }
     }
 }
+    
