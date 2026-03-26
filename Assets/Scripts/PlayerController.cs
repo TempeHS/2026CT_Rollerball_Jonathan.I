@@ -19,7 +19,7 @@ public class PlayerController : MonoBehaviour
     public TextMeshProUGUI countText;
     public GameObject winTextObject;
 
-    // ⭐ NEW — pickup respawn system
+    //  NEW — pickup respawn system
     public GameObject pickupPrefab;
     public Vector3 spawnAreaSize = new Vector3(10, 0, 10);
 
@@ -65,13 +65,13 @@ public class PlayerController : MonoBehaviour
             count++;
             SetCountText();
 
-            // ⭐ Spawn TWO new pickups
+            //  Spawn TWO new pickups
             SpawnNewPickup();
             SpawnNewPickup();
         }
     }
 
-    // ⭐ NEW — spawns a new pickup in a random area
+    //  NEW — spawns a new pickup in a random area
     void SpawnNewPickup()
     {
         Vector3 randomPos = transform.position + new Vector3(
@@ -91,6 +91,8 @@ public class PlayerController : MonoBehaviour
         {
             winTextObject.SetActive(true);
             Destroy(GameObject.FindGameObjectWithTag("Enemy"));
+
+            FindObjectOfType<TimerManager>().StopTimer();   // ⬅ NEW
         }
     }
 
@@ -101,7 +103,8 @@ public class PlayerController : MonoBehaviour
             Destroy(gameObject); 
             winTextObject.gameObject.SetActive(true);
             winTextObject.GetComponent<TextMeshProUGUI>().text = "You Lose!";
+
+            FindObjectOfType<TimerManager>().StopTimer();   // ⬅ NEW
         }
     }
 }
-    
