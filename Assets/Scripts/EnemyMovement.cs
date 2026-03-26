@@ -1,29 +1,44 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemyMovement : MonoBehaviour
+public class EnemyAI : MonoBehaviour
 {
- // Reference to the player's transform.
- public Transform player;
+    private Transform player;
+    private NavMeshAgent agent;
 
- // Reference to the NavMeshAgent component for pathfinding.
- private NavMeshAgent navMeshAgent;
-
- // Start is called before the first frame update.
- void Start()
+    void Start()
     {
- // Get and store the NavMeshAgent component attached to this object.
-        navMeshAgent = GetComponent<NavMeshAgent>();
+        agent = GetComponent<NavMeshAgent>();
+
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+            player = playerObj.transform;
     }
 
- // Update is called once per frame.
- void Update()
+    void Update()
     {
- // If there's a reference to the player...
- if (player != null)
-        {    
- // Set the enemy's destination to the player's current position.
-            navMeshAgent.SetDestination(player.position);
+        if (player == null) return;
+
+        // Wait until game starts
+        if (!PlayerController.gameStarted)
+        {
+            agent.isStopped = true;
+            return;
+        }
+
+        agent.isStopped = false;
+
+        // Chase player
+        agent.SetDestination(player.position);
+
+        // Face the player (with +270° Y rotation correction)
+        Vector3 direction = player.position - transform.position;
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude > 0.001f)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 270, 0);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 10f);
         }
     }
 }
