@@ -19,8 +19,8 @@ public class EnemyAI : MonoBehaviour
     {
         if (player == null) return;
 
-        // Wait until game starts
-        if (!PlayerController.gameStarted)
+        // Stop if player is dead OR game hasn't started
+        if (PlayerController.playerDead || !PlayerController.gameStarted)
         {
             agent.isStopped = true;
             return;
@@ -31,7 +31,7 @@ public class EnemyAI : MonoBehaviour
         // Chase player
         agent.SetDestination(player.position);
 
-        // Face the player (with +270° Y rotation correction)
+        // Face the player with +270° Y rotation correction
         Vector3 direction = player.position - transform.position;
         direction.y = 0f;
 

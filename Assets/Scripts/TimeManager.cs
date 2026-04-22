@@ -1,46 +1,81 @@
 using UnityEngine;
 using TMPro;
 
-public class TimerManager : MonoBehaviour
+public class GameTimer : MonoBehaviour
 {
+    public static GameTimer instance;
+
     public TextMeshProUGUI timerText;
-    public TextMeshProUGUI bestTimeText;
+    public TextMeshProUGUI bestText;
 
-    private float currentTime = 0f;
-    private bool timerRunning = true;
+    private float time;
+    private bool running;
 
-    private float bestTime = 0f;
+    private float bestTime;
+
+    void Awake()
+    {
+        instance = this;
+    }
 
     void Start()
     {
-        // Load best time
-        bestTime = PlayerPrefs.GetFloat("BestTime", 0f);
+        // ONE-TIME RESET OF BEST TIME
+        if (!PlayerPrefs.HasKey("BestTimeReset"))
+        {
+            PlayerPrefs.DeleteKey("BestTime");
+            PlayerPrefs.SetInt("BestTimeReset", 1);
+            PlayerPrefs.Save();
+        }
 
-        if (bestTime > 0)
-            bestTimeText.text = "Best: " + bestTime.ToString("F2") + "s";
-        else
-            bestTimeText.text = "Best: ---";
+        // Load best time
+        bestTime = PlayerPrefs.GetFloat("BestTime", -1f);
+        UpdateBestText();
+
+        // Default timer display
+        timerText.text = "Time: 00:00.00";
     }
 
     void Update()
     {
-        if (timerRunning)
+        if (!running) return;
+
+        time += Time.deltaTime;
+        timerText.text = "Time: " + Format(time);
+    }
+
+    public void Begin()
+    {
+        time = 0f;
+        running = true;
+    }
+
+    public void Stop()
+    {
+        running = false;
+
+        // Save new best time
+        if (bestTime < 0f || time < bestTime)
         {
-            currentTime += Time.deltaTime;
-            timerText.text = "Time: " + currentTime.ToString("F2") + "s";
+            bestTime = time;
+            PlayerPrefs.SetFloat("BestTime", bestTime);
+            PlayerPrefs.Save();
+            UpdateBestText();
         }
     }
 
-    public void StopTimer()
+    void UpdateBestText()
     {
-        timerRunning = false;
+        if (bestTime < 0f)
+            bestText.text = "Best: --:--.--";
+        else
+            bestText.text = "Best: " + Format(bestTime);
+    }
 
-        // Save best time if it's better
-        if (bestTime == 0 || currentTime < bestTime)
-        {
-            bestTime = currentTime;
-            PlayerPrefs.SetFloat("BestTime", bestTime);
-            bestTimeText.text = "Best: " + bestTime.ToString("F2") + "s";
-        }
+    string Format(float t)
+    {
+        int minutes = Mathf.FloorToInt(t / 60f);
+        float seconds = t % 60f;
+        return $"{minutes:00}:{seconds:00.00}";
     }
 }
