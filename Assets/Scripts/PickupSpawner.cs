@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class PickupSpawner : MonoBehaviour
 {
-    public GameObject pickupPrefab;   // The pickup to spawn
-    public Vector3 spawnAreaSize = new Vector3(10, 0, 10); // Area to spawn in
+    public GameObject pickupPrefab;   
+    public Vector3 spawnAreaSize = new Vector3(10, 0, 10); 
 
     public void SpawnNewPickup()
     {

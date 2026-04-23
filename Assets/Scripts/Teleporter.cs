@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Teleporter : MonoBehaviour
 {
-    public Transform destination;   // Where this teleporter sends the player
+    public Transform destination;   
     public float cooldownTime = 0.5f;
 
     private bool canTeleport = true;
@@ -11,10 +11,9 @@ public class Teleporter : MonoBehaviour
     {
         if (other.CompareTag("Player") && canTeleport)
         {
-            // Move player to destination
+            
             other.transform.position = destination.position;
 
-            // Prevent instant re-teleporting
             Teleporter destTeleporter = destination.GetComponent<Teleporter>();
             if (destTeleporter != null)
             {

@@ -20,7 +20,6 @@ public class GameTimer : MonoBehaviour
 
     void Start()
     {
-        // ONE-TIME RESET OF BEST TIME
         if (!PlayerPrefs.HasKey("BestTimeReset"))
         {
             PlayerPrefs.DeleteKey("BestTime");
@@ -28,11 +27,9 @@ public class GameTimer : MonoBehaviour
             PlayerPrefs.Save();
         }
 
-        // Load best time
         bestTime = PlayerPrefs.GetFloat("BestTime", -1f);
         UpdateBestText();
 
-        // Default timer display
         timerText.text = "Time: 00:00.00";
     }
 
@@ -50,11 +47,12 @@ public class GameTimer : MonoBehaviour
         running = true;
     }
 
-    public void Stop()
+    public void Stop(bool won)
     {
         running = false;
 
-        // Save new best time
+        if (!won) return; 
+
         if (bestTime < 0f || time < bestTime)
         {
             bestTime = time;
